@@ -1,0 +1,28 @@
+# Diretórios de dependências
+node_modules/
+
+# Diretório de build
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Diretório do ambiente Docker
+docker-compose.override.yml
+
+# Arquivos de ambiente
+.env
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Cache do editor de código
+*.vscode
+.idea/
+
+# Outros arquivos temporários
+tmp/
+temp/

@@ -4,16 +4,28 @@ import {
   listarDepoimentos,
   obterDepoimentoPorId,
   adicionarComentario,
-  listarComentarios
+  listarComentarios,
+  uploadFoto,
 } from "../controllers/depoimentoController";
-import upload from "../middleware/upload";
+import multer from "multer";
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
 
 const router = Router();
 
-router.post("/", upload.single("file"), criarDepoimento);
+router.post("/", upload.single("foto"), criarDepoimento);
 router.get("/", listarDepoimentos);
 router.get("/:id", obterDepoimentoPorId);
-router.post("/:id/comentarios", adicionarComentario); 
+router.post("/:id/comentarios", adicionarComentario);
 router.get("/:id/comentarios", listarComentarios);
+router.post("/depoimentos/:id/foto", upload.single("foto"), uploadFoto);
 
 export default router;

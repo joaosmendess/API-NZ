@@ -1,5 +1,16 @@
 import { Request, Response } from "express";
 import { Depoimento } from "../models/Depoimento";
+import multer from "multer";
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+const upload = multer({ storage });
 
 const listarDepoimentos = async (req: Request, res: Response) => {
   try {
@@ -36,7 +47,9 @@ const obterDepoimentoPorId = async (req: Request, res: Response) => {
 
 const criarDepoimento = async (req: Request, res: Response) => {
   try {
-    const { nome, email, telefone, texto, videoUrl, fotoUrl } = req.body;
+    const { nome, email, telefone, texto, videoUrl } = req.body;
+    const fotoUrl = req.file ? `/uploads/${req.file.filename}` : undefined;
+
     const novoDepoimento = new Depoimento({
       nome,
       email,
@@ -45,6 +58,7 @@ const criarDepoimento = async (req: Request, res: Response) => {
       videoUrl,
       fotoUrl,
     });
+
     const depoimentoSalvo = await novoDepoimento.save();
     res.status(201).json(depoimentoSalvo);
   } catch (error) {
@@ -97,10 +111,35 @@ const listarComentarios = async (req: Request, res: Response) => {
   }
 };
 
+const uploadFoto = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const depoimento = await Depoimento.findById(id);
+    if (!depoimento) {
+      return res.status(404).json({ error: "Depoimento não encontrado" });
+    }
+    if (req.file) {
+      depoimento.fotoUrl = `/uploads/${req.file.filename}`;
+      await depoimento.save();
+      res.status(200).json(depoimento);
+    } else {
+      res.status(400).json({ error: "Nenhum arquivo enviado" });
+    }
+  } catch (error) {
+    console.error("Erro ao fazer upload da foto:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Erro desconhecido";
+    res
+      .status(500)
+      .json({ error: "Erro ao fazer upload da foto", details: errorMessage });
+  }
+};
+
 export {
   criarDepoimento,
   listarDepoimentos,
   obterDepoimentoPorId,
   adicionarComentario,
   listarComentarios,
+  uploadFoto,
 };

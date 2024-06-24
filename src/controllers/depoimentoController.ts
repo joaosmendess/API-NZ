@@ -3,7 +3,9 @@ import { Depoimento } from "../models/Depoimento";
 
 const listarDepoimentos = async (req: Request, res: Response) => {
   try {
-    const depoimentos = await Depoimento.find();
+    const depoimentos = await Depoimento.find().select(
+      "id nome texto videoUrl fotoUrl"
+    );
     res.status(200).json(depoimentos);
   } catch (error) {
     console.error("Erro ao listar depoimentos:", error);
@@ -49,7 +51,7 @@ const criarDepoimento = async (req: Request, res: Response) => {
     });
 
     const depoimentoSalvo = await novoDepoimento.save();
-    console.log("Depoimento salvo:", depoimentoSalvo); 
+    console.log("Depoimento salvo:", depoimentoSalvo);
     res.status(201).json(depoimentoSalvo);
   } catch (error) {
     console.error("Erro ao criar depoimento:", error);
@@ -100,7 +102,6 @@ const listarComentarios = async (req: Request, res: Response) => {
       .json({ error: "Erro ao listar comentários", details: errorMessage });
   }
 };
-
 
 export {
   criarDepoimento,

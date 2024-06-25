@@ -1,19 +1,34 @@
 import { Request, Response } from "express";
-import { Depoimento } from "../models/Depoimento";
+import { Depoimento, IDepoimento } from "../models/Depoimento";
+
+const toPublicUrl = (localPath: any) => {
+  if (!localPath) return null;
+  // Garantir que não haja 'undefined' no início da URL
+  const baseUrl = "http://localhost:3001"; // Adicione um fallback
+  // const baseUrl = process.env.BASE_URL || "http://localhost:3001"; 
+  const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
+  return `${baseUrl}/${adjustedPath}`;
+};
+
+
 
 const listarDepoimentos = async (req: Request, res: Response) => {
   try {
-    const depoimentos = await Depoimento.find().select(
-      "id nome texto videoUrl fotoUrl"
-    );
+    let depoimentos = await Depoimento.find().select("id nome texto videoUrl fotoUrl");
+    depoimentos = depoimentos.map(depoimento => {
+      const depoimentoObj = depoimento.toObject();
+      return {
+        ...depoimentoObj,
+        fotoUrl: toPublicUrl(depoimentoObj.fotoUrl),
+        videoUrl: toPublicUrl(depoimentoObj.videoUrl),
+      } as IDepoimento; 
+    });
     res.status(200).json(depoimentos);
   } catch (error) {
     console.error("Erro ao listar depoimentos:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Erro desconhecido";
-    res
-      .status(500)
-      .json({ error: "Erro ao listar depoimentos", details: errorMessage });
+    res.status(500).json({ error: "Erro ao listar depoimentos", details: errorMessage });
   }
 };
 
@@ -25,29 +40,51 @@ const obterDepoimentoPorId = async (req: Request, res: Response) => {
       console.error(`Depoimento com ID ${id} não encontrado.`);
       return res.status(404).json({ error: "Depoimento não encontrado" });
     }
-    res.status(200).json(depoimento);
+    const depoimentoPublic = {
+      ...depoimento.toObject(),
+      fotoUrl: toPublicUrl(depoimento.fotoUrl),
+      videoUrl: toPublicUrl(depoimento.videoUrl),
+    };
+    res.status(200).json(depoimentoPublic);
   } catch (error) {
     console.error(`Erro ao buscar depoimento:`, error);
     const errorMessage =
       error instanceof Error ? error.message : "Erro desconhecido";
-    res
-      .status(500)
-      .json({ error: "Erro ao buscar depoimento", details: errorMessage });
+    res.status(500).json({ error: "Erro ao buscar depoimento", details: errorMessage });
   }
 };
 
+
 const criarDepoimento = async (req: Request, res: Response) => {
   try {
-    const { nome, email, telefone, texto, videoUrl, foto } = req.body;
-    const fotoUrl = foto;
+    console.log(req.body);
+    const { nome, email, telefone, texto } = req.body;
+    let fotoUrl = null;
+    let videoUrl = null;
+
+    if (req.files && typeof req.files === "object" && "foto" in req.files) {
+      fotoUrl = req.files["foto"][0].path;
+    }
+    if (req.files && typeof req.files === "object" && "video" in req.files) {
+      videoUrl = req.files["video"][0].path;
+      console.log(videoUrl);
+    }
+
+    if (fotoUrl === null && videoUrl === null) {
+      return res
+        .status(400)
+        .json({ error: "Depoimento deve conter ao menos uma foto ou vídeo" });
+    }
+
+
 
     const novoDepoimento = new Depoimento({
       nome,
       email,
       telefone,
       texto,
-      videoUrl,
       fotoUrl,
+      videoUrl,
     });
 
     const depoimentoSalvo = await novoDepoimento.save();

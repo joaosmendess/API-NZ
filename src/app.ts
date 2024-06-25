@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import depoimentoRoutes from "./routes/depoimentoRoutes";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 
 dotenv.config();
 
@@ -15,6 +16,9 @@ const MONGODB_URI =
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // Conexão com o MongoDB
 mongoose

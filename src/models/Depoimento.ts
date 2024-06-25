@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 interface IComentario {
   nome: string;
   comentario: string;
@@ -6,6 +6,7 @@ interface IComentario {
 }
 
 interface IDepoimento extends Document {
+  _id: Types.ObjectId;
   nome: string;
   email: string;
   telefone: string;

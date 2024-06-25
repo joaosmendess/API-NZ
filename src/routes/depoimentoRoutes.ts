@@ -10,7 +10,14 @@ import upload from "../middleware/upload";
 
 const router = Router();
 
-router.post("/", upload.single("foto"), criarDepoimento);
+router.post(
+  "/",
+  upload.fields([
+    { name: 'foto', maxCount: 1 },
+    { name: 'video', maxCount: 1 }
+  ]),
+  criarDepoimento
+);
 router.get("/", listarDepoimentos);
 router.get("/:id", obterDepoimentoPorId);
 router.post("/:id/comentarios", adicionarComentario);

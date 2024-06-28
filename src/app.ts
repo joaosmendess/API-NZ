@@ -17,7 +17,8 @@ const PORT = process.env.PORT || 3001;
 
   const MONGODB_URI =
   process.env.MONGODB_URI ||
-  "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.10";
+  "mongodb://admin:0504@127.0.0.1:27017/nz-depoimento?authSource=admin";
+
 // Middleware
 app.use(cors());
 app.use(express.json());

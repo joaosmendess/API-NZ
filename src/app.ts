@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3001;
 
   const MONGODB_URI =
   process.env.MONGODB_URI ||
-  "mongodb://admin:0504@127.0.0.1:27017/nz-depoimento?authSource=admin";
+  "mongodb://avoguga:0504@127.0.0.1:27017/nz-depoimento";
 
 // Middleware
 app.use(cors());

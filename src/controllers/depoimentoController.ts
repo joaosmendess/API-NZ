@@ -4,7 +4,7 @@ import { Depoimento, IDepoimento } from "../models/Depoimento";
 const toPublicUrl = (localPath: any) => {
   if (!localPath) return null;
   // Garantir que não haja 'undefined' no início da URL
-  const baseUrl = "http://localhost:3001"; // Adicione um fallback
+  const baseUrl = "http://93.127.210.45:3001"; // Adicione um fallback
   // const baseUrl = process.env.BASE_URL || "http://localhost:3001"; 
   const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
   return `${baseUrl}/${adjustedPath}`;

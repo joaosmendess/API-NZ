@@ -3,14 +3,12 @@ import { Depoimento, IDepoimento } from "../models/Depoimento";
 
 const toPublicUrl = (localPath: any) => {
   if (!localPath) return null;
-  // Garantir que não haja 'undefined' no início da URL
-  const baseUrl = "http://93.127.210.45:3001"; // Adicione um fallback
-  // const baseUrl = process.env.BASE_URL || "http://localhost:3001"; 
+  // const baseUrl = "http://93.127.210.45:3001"; // Rota de prod, tenho que arrumar ela ainda.
+  const baseUrl = "http://localhost:3001"; // Adicione um fallback
+  // const baseUrl = process.env.BASE_URL || "http://localhost:3001";
   const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
   return `${baseUrl}/${adjustedPath}`;
 };
-
-
 
 const listarDepoimentos = async (req: Request, res: Response) => {
   try {
@@ -21,7 +19,7 @@ const listarDepoimentos = async (req: Request, res: Response) => {
         ...depoimentoObj,
         fotoUrl: toPublicUrl(depoimentoObj.fotoUrl),
         videoUrl: toPublicUrl(depoimentoObj.videoUrl),
-      } as IDepoimento; 
+      } as IDepoimento;
     });
     res.status(200).json(depoimentos);
   } catch (error) {
@@ -54,7 +52,6 @@ const obterDepoimentoPorId = async (req: Request, res: Response) => {
   }
 };
 
-
 const criarDepoimento = async (req: Request, res: Response) => {
   try {
     console.log(req.body);
@@ -75,8 +72,6 @@ const criarDepoimento = async (req: Request, res: Response) => {
         .status(400)
         .json({ error: "Depoimento deve conter ao menos uma foto ou vídeo" });
     }
-
-
 
     const novoDepoimento = new Depoimento({
       nome,
@@ -140,10 +135,29 @@ const listarComentarios = async (req: Request, res: Response) => {
   }
 };
 
+const deletarDepoimento = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const depoimento = await Depoimento.findByIdAndDelete(id);
+    if (!depoimento) {
+      return res.status(404).json({ error: "Depoimento não encontrado" });
+    }
+    res.status(200).json({ message: "Depoimento deletado com sucesso" });
+  } catch (error) {
+    console.error("Erro ao deletar depoimento:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Erro desconhecido";
+    res
+      .status(500)
+      .json({ error: "Erro ao deletar depoimento", details: errorMessage });
+  }
+};
+
 export {
   criarDepoimento,
   listarDepoimentos,
   obterDepoimentoPorId,
   adicionarComentario,
   listarComentarios,
+  deletarDepoimento,
 };

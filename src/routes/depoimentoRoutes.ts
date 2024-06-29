@@ -1,14 +1,15 @@
-import { Router } from "express";
+import express from 'express';
 import {
   criarDepoimento,
   listarDepoimentos,
   obterDepoimentoPorId,
   adicionarComentario,
   listarComentarios,
-} from "../controllers/depoimentoController";
-import upload from "../middleware/upload";
+  deletarDepoimento
+} from '../controllers/depoimentoController';
+import upload from '../middleware/upload';
 
-const router = Router();
+const router = express.Router();
 
 router.post(
   "/",
@@ -18,9 +19,10 @@ router.post(
   ]),
   criarDepoimento
 );
-router.get("/", listarDepoimentos);
-router.get("/:id", obterDepoimentoPorId);
-router.post("/:id/comentarios", adicionarComentario);
-router.get("/:id/comentarios", listarComentarios);
+router.get('/', listarDepoimentos);
+router.get('/:id', obterDepoimentoPorId);
+router.post('/:id/comentarios', adicionarComentario);
+router.get('/:id/comentarios', listarComentarios);
+router.delete('/:id', deletarDepoimento);
 
 export default router;

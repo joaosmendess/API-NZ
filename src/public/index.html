@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Museu</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #E4AB57;
+        }
+        .container {
+            background-color: #E4AB57;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .depoimentos-container {
+            margin-bottom: 20px;
+        }
+        .depoimento {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fefefe;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .depoimento img {
+            max-width: 150px;
+            height: auto;
+            border-radius: 8px;
+        }
+        .depoimento video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        .depoimento h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="depoimentos-container">
+            <h2>Depoimentos</h2>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#depoimentoModal">Criar Depoimento</button>
+            <div id="depoimentosList"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="depoimentoModal" tabindex="-1" role="dialog" aria-labelledby="depoimentoModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="depoimentoModalLabel">Criar Depoimento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="depoimentoForm" class="needs-validation" novalidate>
+                        <div class="form-group">
+                            <label for="nome">Nome:</label>
+                            <input type="text" id="nome" name="nome" class="form-control" required>
+                            <div class="invalid-feedback">Por favor, insira o nome.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" class="form-control" required>
+                            <div class="invalid-feedback">Por favor, insira um email válido.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefone">Telefone:</label>
+                            <input type="text" id="telefone" name="telefone" class="form-control" required>
+                            <div class="invalid-feedback">Por favor, insira o telefone.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="texto">Texto:</label>
+                            <textarea id="texto" name="texto" class="form-control" required></textarea>
+                            <div class="invalid-feedback">Por favor, insira o texto do depoimento.</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="foto">Foto:</label>
+                            <input type="file" id="foto" name="foto" class="form-control-file">
+                        </div>
+                        <div class="form-group">
+                            <label for="video">Video:</label>
+                            <input type="file" id="video" name="video" class="form-control-file">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const depoimentoForm = document.getElementById('depoimentoForm');
+            const depoimentosList = document.getElementById('depoimentosList');
+
+            depoimentoForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                if (depoimentoForm.checkValidity() === false) {
+                    event.stopPropagation();
+                    depoimentoForm.classList.add('was-validated');
+                    return;
+                }
+
+                const formData = new FormData(depoimentoForm);
+
+                try {
+                    const response = await fetch('/depoimentos', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        alert('Depoimento criado com sucesso!');
+                        depoimentoForm.reset();
+                        depoimentoForm.classList.remove('was-validated');
+                        $('#depoimentoModal').modal('hide');
+                        carregarDepoimentos();
+                    } else {
+                        alert('Erro ao criar depoimento.');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                }
+            });
+
+            async function carregarDepoimentos() {
+                try {
+                    const response = await fetch('/depoimentos');
+                    const depoimentos = await response.json();
+
+                    depoimentosList.innerHTML = '';
+                    depoimentos.forEach(depoimento => {
+                        const depoimentoDiv = document.createElement('div');
+                        depoimentoDiv.className = 'depoimento';
+                        depoimentoDiv.innerHTML = `
+                            <h3>${depoimento.nome}</h3>
+                            <p>${depoimento.texto}</p>
+                            ${depoimento.fotoUrl ? `<img src="${depoimento.fotoUrl}" alt="Foto">` : ''}
+                            ${depoimento.videoUrl ? `<video src="${depoimento.videoUrl}" controls></video>` : ''}
+                            <button class="btn btn-danger mt-2" onclick="deletarDepoimento('${depoimento._id}')">Deletar</button>
+                        `;
+                        depoimentosList.appendChild(depoimentoDiv);
+                    });
+                } catch (error) {
+                    console.error('Erro ao carregar depoimentos:', error);
+                }
+            }
+
+            window.deletarDepoimento = async (id) => {
+                try {
+                    const response = await fetch(`/depoimentos/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Depoimento deletado com sucesso!');
+                        carregarDepoimentos();
+                    } else {
+                        alert('Erro ao deletar depoimento.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao deletar depoimento:', error);
+                }
+            };
+
+            carregarDepoimentos();
+        });
+    </script>
+</body>
+</html>

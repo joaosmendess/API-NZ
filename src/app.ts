@@ -11,13 +11,13 @@ const app = express();
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 3001;
-// const MONGODB_URI =
-//   process.env.MONGODB_URI ||
-//   "mongodb://127.0.0.1:27017/nz-depoimento?authSource=admin"; // local gustavo
-
-  const MONGODB_URI =
+const MONGODB_URI =
   process.env.MONGODB_URI ||
-  "mongodb://admin:0504@127.0.0.1:27017/nz-depoimento?authSource=admin";
+  "mongodb://127.0.0.1:27017/nz-depoimento?authSource=admin"; // local gustavo
+
+// const MONGODB_URI =
+// process.env.MONGODB_URI ||
+// "mongodb://admin:0504@127.0.0.1:27017/nz-depoimento?authSource=admin"; // prod
 
 // Middleware
 app.use(cors());
@@ -31,6 +31,14 @@ mongoose
 
 // Rotas
 app.use("/depoimentos", depoimentoRoutes);
+
+// Servir o arquivo index.html
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Qualquer rota não especificada retorna o index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

@@ -5,7 +5,8 @@ import {
   obterDepoimentoPorId,
   adicionarComentario,
   listarComentarios,
-  deletarDepoimento
+  deletarDepoimento,
+  deletarComentario
 } from '../controllers/depoimentoController';
 import upload from '../middleware/upload';
 
@@ -23,6 +24,7 @@ router.get('/', listarDepoimentos);
 router.get('/:id', obterDepoimentoPorId);
 router.post('/:id/comentarios', adicionarComentario);
 router.get('/:id/comentarios', listarComentarios);
+router.delete('/:id/comentarios/:comentarioId', deletarComentario); 
 router.delete('/:id', deletarDepoimento);
 
 export default router;

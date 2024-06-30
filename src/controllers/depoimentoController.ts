@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import { Depoimento, IDepoimento } from "../models/Depoimento";
+import { Depoimento, IComentario, IDepoimento } from "../models/Depoimento";
+import fs from "fs";
+import path from "path";
 
 const toPublicUrl = (localPath: any) => {
   if (!localPath) return null;
-  // const baseUrl = "http://93.127.210.45:3001"; // Rota de prod, tenho que arrumar ela ainda.
-  const baseUrl = "http://localhost:3001"; // Adicione um fallback
-  // const baseUrl = process.env.BASE_URL || "http://localhost:3001";
+    const baseUrl = "https://gestormuseu.serradabarriga.app.br/"; // Rota de prod, tenho que arrumar ela ainda.
+  // const baseUrl = "http://localhost:3001"; // Adicione um fallback
   const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
   return `${baseUrl}/${adjustedPath}`;
 };
@@ -54,7 +55,6 @@ const obterDepoimentoPorId = async (req: Request, res: Response) => {
 
 const criarDepoimento = async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
     const { nome, email, telefone, texto } = req.body;
     let fotoUrl = null;
     let videoUrl = null;
@@ -64,7 +64,6 @@ const criarDepoimento = async (req: Request, res: Response) => {
     }
     if (req.files && typeof req.files === "object" && "video" in req.files) {
       videoUrl = req.files["video"][0].path;
-      console.log(videoUrl);
     }
 
     if (fotoUrl === null && videoUrl === null) {
@@ -83,7 +82,6 @@ const criarDepoimento = async (req: Request, res: Response) => {
     });
 
     const depoimentoSalvo = await novoDepoimento.save();
-    console.log("Depoimento salvo:", depoimentoSalvo);
     res.status(201).json(depoimentoSalvo);
   } catch (error) {
     console.error("Erro ao criar depoimento:", error);
@@ -103,9 +101,15 @@ const adicionarComentario = async (req: Request, res: Response) => {
     if (!depoimento) {
       return res.status(404).json({ error: "Depoimento não encontrado" });
     }
-    depoimento.comentarios.push({ nome, comentario, data: new Date(data) });
+
+    const novoComentario: IComentario = {
+      nome,
+      comentario,
+      data: new Date(data),
+    } as IComentario;
+
+    depoimento.comentarios.push(novoComentario);
     await depoimento.save();
-    console.log(req.body);
     res.status(200).json(depoimento);
   } catch (error) {
     console.error("Erro ao adicionar comentário:", error);
@@ -142,6 +146,19 @@ const deletarDepoimento = async (req: Request, res: Response) => {
     if (!depoimento) {
       return res.status(404).json({ error: "Depoimento não encontrado" });
     }
+
+    // Deletar arquivos associados
+    if (depoimento.fotoUrl) {
+      fs.unlink(depoimento.fotoUrl, (err) => {
+        if (err) console.error(`Erro ao deletar arquivo de foto: ${err.message}`);
+      });
+    }
+    if (depoimento.videoUrl) {
+      fs.unlink(depoimento.videoUrl, (err) => {
+        if (err) console.error(`Erro ao deletar arquivo de vídeo: ${err.message}`);
+      });
+    }
+
     res.status(200).json({ message: "Depoimento deletado com sucesso" });
   } catch (error) {
     console.error("Erro ao deletar depoimento:", error);
@@ -153,6 +170,34 @@ const deletarDepoimento = async (req: Request, res: Response) => {
   }
 };
 
+const deletarComentario = async (req: Request, res: Response) => {
+  const { id, comentarioId } = req.params;
+  try {
+    const depoimento = await Depoimento.findById(id);
+    if (!depoimento) {
+      return res.status(404).json({ error: "Depoimento não encontrado" });
+    }
+
+    const comentarioIndex = depoimento.comentarios.findIndex(
+      (comentario: IComentario) => comentario._id.toString() === comentarioId
+    );
+    if (comentarioIndex === -1) {
+      return res.status(404).json({ error: "Comentário não encontrado" });
+    }
+
+    depoimento.comentarios.splice(comentarioIndex, 1);
+    await depoimento.save();
+    res.status(200).json({ message: "Comentário deletado com sucesso" });
+  } catch (error) {
+    console.error("Erro ao deletar comentário:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Erro desconhecido";
+    res
+      .status(500)
+      .json({ error: "Erro ao deletar comentário", details: errorMessage });
+  }
+};
+
 export {
   criarDepoimento,
   listarDepoimentos,
@@ -160,4 +205,5 @@ export {
   adicionarComentario,
   listarComentarios,
   deletarDepoimento,
+  deletarComentario
 };

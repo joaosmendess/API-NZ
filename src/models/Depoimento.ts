@@ -1,5 +1,7 @@
 import { Schema, model, Document, Types } from "mongoose";
-interface IComentario {
+
+interface IComentario extends Document {
+  _id: Types.ObjectId;
   nome: string;
   comentario: string;
   data: Date;

@@ -18,7 +18,7 @@ const fs_1 = __importDefault(require("fs"));
 const toPublicUrl = (localPath) => {
     if (!localPath)
         return null;
-    const baseUrl = "https://gestormuseu.serradabarriga.app.br/"; // Rota de prod, tenho que arrumar ela ainda.
+    const baseUrl = "https://gestormuseu.serradabarriga.app.br"; // Rota de prod, tenho que arrumar ela ainda.
     // const baseUrl = "http://localhost:3001"; // Adicione um fallback
     const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
     return `${baseUrl}/${adjustedPath}`;

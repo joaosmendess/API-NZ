@@ -2,7 +2,7 @@
 node_modules/
 
 # Diretório de build
-dist/
+# dist gambiarra pra subir o dist buildado com a pasta public
 
 # Logs
 npm-debug.log*

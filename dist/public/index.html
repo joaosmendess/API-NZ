@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Museu</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #E4AB57;
+        }
+        .container {
+            background-color: #E4AB57;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .depoimentos-container {
+            margin-bottom: 20px;
+        }
+        .depoimento {
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background-color: #fefefe;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .depoimento img, .depoimento video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .depoimento h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            margin-top: 10px;
+        }
+        .comment {
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 2px solid #e0e0e0;
+        }
+        .comment p {
+            margin-bottom: 5px;
+        }
+        .comment button {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container depoimentos-container" id="depoimentosContainer">
+        <button class="btn btn-secondary logout-btn" onclick="logout()">Logout</button>
+        <h2>Depoimentos</h2>
+        <input type="text" id="filtroNome" class="form-control mb-4" placeholder="Filtrar por nome" aria-label="Filtrar depoimentos por nome">
+        <div id="depoimentosList"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filtroNome = document.getElementById('filtroNome');
+            const depoimentosList = document.getElementById('depoimentosList');
+
+            filtroNome.addEventListener('input', () => {
+                carregarDepoimentos(filtroNome.value);
+            });
+
+            async function carregarDepoimentos(filtro = '') {
+                try {
+                    const response = await fetch('/depoimentos');
+                    const depoimentos = await response.json();
+
+                    depoimentosList.innerHTML = '';
+                    depoimentos
+                        .filter(depoimento => depoimento.nome.toLowerCase().includes(filtro.toLowerCase()))
+                        .reverse() // Inverter a ordem dos depoimentos
+                        .forEach(depoimento => {
+                            const depoimentoDiv = document.createElement('div');
+                            depoimentoDiv.className = 'depoimento';
+                            depoimentoDiv.innerHTML = `
+                                <h3>${depoimento.nome}</h3>
+                                ${depoimento.texto ? `<p>${depoimento.texto}</p>` : ''}
+                                ${depoimento.fotoUrl ? `<img src="${depoimento.fotoUrl}" alt="Foto do depoimento">` : ''}
+                                ${depoimento.videoUrl ? `<video src="${depoimento.videoUrl}" controls></video>` : ''}
+                                <button class="btn btn-danger mt-2" onclick="deletarDepoimento('${depoimento._id}')">Deletar Depoimento</button>
+                                <h4>Comentários</h4>
+                                <div id="comentarios-${depoimento._id}"></div>
+                            `;
+                            depoimentosList.appendChild(depoimentoDiv);
+                            carregarComentarios(depoimento._id);
+                        });
+                } catch (error) {
+                    console.error('Erro ao carregar depoimentos:', error);
+                }
+            }
+
+            async function carregarComentarios(depoimentoId) {
+                try {
+                    const response = await fetch(`/depoimentos/${depoimentoId}/comentarios`);
+                    const comentarios = await response.json();
+
+                    const comentariosDiv = document.getElementById(`comentarios-${depoimentoId}`);
+                    comentariosDiv.innerHTML = '';
+                    comentarios
+                        .reverse() // Inverter a ordem dos comentários
+                        .forEach(comentario => {
+                            const comentarioDiv = document.createElement('div');
+                            comentarioDiv.className = 'comment';
+                            comentarioDiv.innerHTML = `
+                                <p><strong>${comentario.nome}</strong>: ${comentario.comentario}</p>
+                                <button class="btn btn-danger btn-sm" onclick="deletarComentario('${depoimentoId}', '${comentario._id}')">Excluir Comentário</button>
+                            `;
+                            comentariosDiv.appendChild(comentarioDiv);
+                        });
+                } catch (error) {
+                    console.error('Erro ao carregar comentários:', error);
+                }
+            }
+
+            window.deletarDepoimento = async (id) => {
+                try {
+                    const response = await fetch(`/depoimentos/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Depoimento deletado com sucesso!');
+                        carregarDepoimentos(filtroNome.value);
+                    } else {
+                        alert('Erro ao deletar depoimento.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao deletar depoimento:', error);
+                }
+            };
+
+            window.deletarComentario = async (depoimentoId, comentarioId) => {
+                try {
+                    const response = await fetch(`/depoimentos/${depoimentoId}/comentarios/${comentarioId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('Comentário deletado com sucesso!');
+                        carregarComentarios(depoimentoId);
+                    } else {
+                        alert('Erro ao deletar comentário.');
+                    }
+                } catch (error) {
+                    console.error('Erro ao deletar comentário:', error);
+                }
+            };
+
+            carregarDepoimentos();
+        });
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    alert('Erro ao fazer logout.');
+                }
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+            }
+        }
+    </script>
+</body>
+</html>

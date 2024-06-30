@@ -21,12 +21,6 @@ const MONGODB_URI = process.env.MONGODB_URI ||
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
-// Middleware para configurar COOP e COEP
-app.use((req, res, next) => {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-    next();
-});
 // Mock simple authentication
 const mockUsers = [
     { username: 'nucleo_zero', password: 'd3fT7g8k' },

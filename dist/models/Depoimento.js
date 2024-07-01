@@ -14,6 +14,7 @@ const DepoimentoSchema = new mongoose_1.Schema({
     texto: { type: String },
     videoUrl: { type: String },
     fotoUrl: { type: String },
+    videoDuration: { type: Number },
     comentarios: [ComentarioSchema]
 });
 const Depoimento = (0, mongoose_1.model)("Depoimento", DepoimentoSchema);

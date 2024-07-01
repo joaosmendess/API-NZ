@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletarComentario = exports.deletarDepoimento = exports.listarComentarios = exports.adicionarComentario = exports.obterDepoimentoPorId = exports.listarDepoimentos = exports.criarDepoimento = void 0;
 const Depoimento_1 = require("../models/Depoimento");
 const fs_1 = __importDefault(require("fs"));
+const get_video_duration_1 = require("get-video-duration");
 const toPublicUrl = (localPath) => {
     if (!localPath)
         return null;
@@ -62,11 +63,13 @@ const criarDepoimento = (req, res) => __awaiter(void 0, void 0, void 0, function
         const { nome, email, telefone, texto } = req.body;
         let fotoUrl = null;
         let videoUrl = null;
+        let videoDuration = null;
         if (req.files && typeof req.files === "object" && "foto" in req.files) {
             fotoUrl = req.files["foto"][0].path;
         }
         if (req.files && typeof req.files === "object" && "video" in req.files) {
             videoUrl = req.files["video"][0].path;
+            videoDuration = yield (0, get_video_duration_1.getVideoDurationInSeconds)(videoUrl);
         }
         if (fotoUrl === null && videoUrl === null) {
             return res
@@ -80,6 +83,7 @@ const criarDepoimento = (req, res) => __awaiter(void 0, void 0, void 0, function
             texto,
             fotoUrl,
             videoUrl,
+            videoDuration,
         });
         const depoimentoSalvo = yield novoDepoimento.save();
         res.status(201).json(depoimentoSalvo);

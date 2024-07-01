@@ -15,6 +15,7 @@ interface IDepoimento extends Document {
   texto?: string;
   videoUrl?: string;
   fotoUrl?: string;
+  videoDuration?: number;
   comentarios: IComentario[];
 }
 
@@ -31,6 +32,7 @@ const DepoimentoSchema = new Schema<IDepoimento>({
   texto: { type: String },
   videoUrl: { type: String },
   fotoUrl: { type: String },
+  videoDuration: { type: Number }, 
   comentarios: [ComentarioSchema]
 });
 

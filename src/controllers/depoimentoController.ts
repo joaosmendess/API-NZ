@@ -2,11 +2,10 @@ import { Request, Response } from "express";
 import { Depoimento, IComentario, IDepoimento } from "../models/Depoimento";
 import fs from "fs";
 import path from "path";
-import { getVideoDurationInSeconds } from 'get-video-duration';
 
 const toPublicUrl = (localPath: any) => {
   if (!localPath) return null;
-  const baseUrl = "https://gestormuseu.serradabarriga.app.br"; // Rota de prod, tenho que arrumar ela ainda.
+    const baseUrl = "https://gestormuseu.serradabarriga.app.br"; // Rota de prod, tenho que arrumar ela ainda.
   // const baseUrl = "http://localhost:3001"; // Adicione um fallback
   const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
   return `${baseUrl}/${adjustedPath}`;
@@ -59,14 +58,12 @@ const criarDepoimento = async (req: Request, res: Response) => {
     const { nome, email, telefone, texto } = req.body;
     let fotoUrl = null;
     let videoUrl = null;
-    let videoDuration = null;
 
     if (req.files && typeof req.files === "object" && "foto" in req.files) {
       fotoUrl = req.files["foto"][0].path;
     }
     if (req.files && typeof req.files === "object" && "video" in req.files) {
       videoUrl = req.files["video"][0].path;
-      videoDuration = await getVideoDurationInSeconds(videoUrl);
     }
 
     if (fotoUrl === null && videoUrl === null) {
@@ -82,7 +79,6 @@ const criarDepoimento = async (req: Request, res: Response) => {
       texto,
       fotoUrl,
       videoUrl,
-      videoDuration,
     });
 
     const depoimentoSalvo = await novoDepoimento.save();

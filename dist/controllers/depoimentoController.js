@@ -25,7 +25,7 @@ const toPublicUrl = (localPath) => {
 };
 const listarDepoimentos = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let depoimentos = yield Depoimento_1.Depoimento.find().select("id nome texto videoUrl fotoUrl");
+        let depoimentos = yield Depoimento_1.Depoimento.find().select("id nome email telefone texto videoUrl fotoUrl");
         depoimentos = depoimentos.map(depoimento => {
             const depoimentoObj = depoimento.toObject();
             return Object.assign(Object.assign({}, depoimentoObj), { fotoUrl: toPublicUrl(depoimentoObj.fotoUrl), videoUrl: toPublicUrl(depoimentoObj.videoUrl) });

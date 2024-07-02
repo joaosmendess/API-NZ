@@ -13,7 +13,7 @@ const toPublicUrl = (localPath: any) => {
 
 const listarDepoimentos = async (req: Request, res: Response) => {
   try {
-    let depoimentos = await Depoimento.find().select("id nome texto videoUrl fotoUrl");
+    let depoimentos = await Depoimento.find().select("id nome email telefone texto videoUrl fotoUrl");
     depoimentos = depoimentos.map(depoimento => {
       const depoimentoObj = depoimento.toObject();
       return {

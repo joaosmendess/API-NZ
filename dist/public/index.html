@@ -208,13 +208,18 @@
             depoimentos.forEach(depoimento => {
                 doc.setFontSize(12);
                 doc.text(`Nome: ${depoimento.nome}`, 20, y);
-                doc.text(`Email: ${depoimento.email}`, 20, y + 10);
+                doc.text(`Email: ${depoimento.email ? depoimento.email : 'Não fornecido'}`, 20, y + 10);
                 if (depoimento.telefone) {
                     doc.text(`Telefone: ${depoimento.telefone}`, 20, y + 20);
-                    y += 30;
+                    y += 40;
                 } else {
-                    y += 20;
+                    y += 30;
                 }
+
+                // Desenhar uma linha após cada bloco de informação
+                doc.setLineWidth(0.5);
+                doc.line(10, y - 5, 200, y - 5);
+
                 if (y > 270) { // Adicionar nova página se necessário
                     doc.addPage();
                     y = 20;

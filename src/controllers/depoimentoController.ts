@@ -11,25 +11,24 @@ const toPublicUrl = (localPath: any) => {
   return `${baseUrl}/${adjustedPath}`;
 };
 
+
 const listarDepoimentos = async (req: Request, res: Response) => {
   try {
-    let depoimentos = await Depoimento.find().select("id nome email telefone texto videoUrl fotoUrl");
-    depoimentos = depoimentos.map(depoimento => {
-      const depoimentoObj = depoimento.toObject();
-      return {
-        ...depoimentoObj,
-        fotoUrl: toPublicUrl(depoimentoObj.fotoUrl),
-        videoUrl: toPublicUrl(depoimentoObj.videoUrl),
-      } as IDepoimento;
-    });
-    res.status(200).json(depoimentos);
+    const depoimentos = await Depoimento.find().select("nome email telefone texto videoUrl fotoUrl").exec();
+    const depoimentosPublic = depoimentos.map(depoimento => ({
+      ...depoimento.toObject(),
+      fotoUrl: toPublicUrl(depoimento.fotoUrl),
+      videoUrl: toPublicUrl(depoimento.videoUrl),
+    }));
+    res.status(200).json(depoimentosPublic);
   } catch (error) {
     console.error("Erro ao listar depoimentos:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Erro desconhecido";
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
     res.status(500).json({ error: "Erro ao listar depoimentos", details: errorMessage });
   }
 };
+
+
 
 const obterDepoimentoPorId = async (req: Request, res: Response) => {
   try {

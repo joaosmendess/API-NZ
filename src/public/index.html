@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor Museu</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <style>
         body {
             padding: 20px;
@@ -18,10 +19,15 @@
             margin: 0 auto;
             position: relative;
         }
-        .logout-btn {
+        .logout-btn, .report-btn {
             position: absolute;
             top: 20px;
+        }
+        .logout-btn {
             right: 20px;
+        }
+        .report-btn {
+            right: 120px;
         }
         .depoimentos-container {
             margin-bottom: 20px;
@@ -66,6 +72,7 @@
 <body>
     <div class="container depoimentos-container" id="depoimentosContainer">
         <button class="btn btn-secondary logout-btn" onclick="logout()">Logout</button>
+        <button class="btn btn-primary report-btn" onclick="criarRelatorio()">Criar Relatório</button>
         <h2>Depoimentos</h2>
         <input type="text" id="filtroNome" class="form-control mb-4" placeholder="Filtrar por nome" aria-label="Filtrar depoimentos por nome">
         <div id="depoimentosList"></div>
@@ -186,6 +193,41 @@
             } catch (error) {
                 console.error('Erro ao fazer logout:', error);
             }
+        }
+
+        async function criarRelatorio() {
+            const { jsPDF } = window.jspdf;
+            const response = await fetch('/depoimentos');
+            const depoimentos = await response.json();
+
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text('Relatório de Depoimentos', 20, 20);
+
+            let y = 30;
+            depoimentos.forEach(depoimento => {
+                doc.setFontSize(12);
+                doc.text(`Nome: ${depoimento.nome}`, 20, y);
+                doc.text(`Email: ${depoimento.email}`, 20, y + 10);
+                if (depoimento.telefone) {
+                    doc.text(`Telefone: ${depoimento.telefone}`, 20, y + 20);
+                    y += 30;
+                } else {
+                    y += 20;
+                }
+                if (y > 270) { // Adicionar nova página se necessário
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+
+            // Formatação adicional
+            doc.setDrawColor(0);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(10, 10, 190, y - 10, 'FD'); // Retângulo ao redor do conteúdo
+
+            doc.save('relatorio_depoimentos.pdf');
         }
     </script>
 </body>

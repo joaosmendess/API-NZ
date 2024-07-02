@@ -205,16 +205,13 @@
             doc.text('Relatório de Depoimentos', 20, 20);
 
             let y = 30;
+            console.log(depoimentos)
             depoimentos.forEach(depoimento => {
                 doc.setFontSize(12);
                 doc.text(`Nome: ${depoimento.nome}`, 20, y);
                 doc.text(`Email: ${depoimento.email ? depoimento.email : 'Não fornecido'}`, 20, y + 10);
-                if (depoimento.telefone) {
-                    doc.text(`Telefone: ${depoimento.telefone}`, 20, y + 20);
-                    y += 40;
-                } else {
-                    y += 30;
-                }
+                doc.text(`Telefone: ${depoimento.telefone ? depoimento.telefone : 'Não fornecido'}`, 20, y + 20);
+                y += 40;
 
                 // Desenhar uma linha após cada bloco de informação
                 doc.setLineWidth(0.5);

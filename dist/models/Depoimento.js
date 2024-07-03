@@ -10,7 +10,7 @@ const ComentarioSchema = new mongoose_1.Schema({
 const DepoimentoSchema = new mongoose_1.Schema({
     nome: { type: String, required: true },
     email: { type: String, required: true },
-    telefone: { type: String, required: true },
+    telefone: { type: String },
     texto: { type: String },
     videoUrl: { type: String },
     fotoUrl: { type: String },

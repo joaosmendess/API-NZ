@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { Depoimento, IComentario, IDepoimento } from "../models/Depoimento";
 import fs from "fs";
-import path from "path";
+import nodemailer from "nodemailer";
 
 const toPublicUrl = (localPath: any) => {
   if (!localPath) return null;
-    const baseUrl = "https://gestormuseu.serradabarriga.app.br"; // Rota de prod, tenho que arrumar ela ainda.
-  // const baseUrl = "http://localhost:3001"; // Adicione um fallback
+    // const baseUrl = "https://gestormuseu.serradabarriga.app.br"; // Rota de prod, tenho que arrumar ela ainda.
+  const baseUrl = "http://localhost:3001"; // rota de dev
   const adjustedPath = localPath.replace(/^.*\/uploads\//, 'uploads/');
   return `${baseUrl}/${adjustedPath}`;
 };
@@ -52,6 +52,59 @@ const obterDepoimentoPorId = async (req: Request, res: Response) => {
   }
 };
 
+const sendThankYouEmail = async (email: string, name: string) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'museupaodeacucar@gmail.com', // your email
+      pass: '@‌Nz3231*24', // your email password
+    },
+  });
+
+  const mailOptions = {
+    from: 'museupaodeacucar@gmail.com',
+    to: email,
+    subject: 'Agradecimento pelo Seu Depoimento!',
+    html: `
+      <div style="background-color: #D7A85C; padding: 20px; font-family: Arial, sans-serif; text-align: center;">
+        <div style="background-color: #FFFFFF; padding: 20px; margin: auto; max-width: 600px; border-radius: 10px;">
+          <img src="cid:logo" alt="Museu de Arte e Cultura Joãozinho Lisboa" style="max-width: 100%; height: auto;"/>
+          <h2 style="color: #8B4513;">Olá ${name},</h2>
+          <p style="color: #8B4513; font-size: 16px;">
+            Gostaríamos de expressar nosso sincero agradecimento por ter compartilhado seu depoimento no totem do Museu de Arte e Cultura - Joãozinho Lisboa.
+            Sua participação é fundamental para enriquecer a experiência de todos os visitantes.
+          </p>
+          <p style="color: #8B4513; font-size: 16px;">
+            Muito obrigado por contribuir com a nossa história!
+          </p>
+          <hr style="border: 1px solid #8B4513; margin: 20px 0;"/>
+          <p style="color: #8B4513; font-size: 16px;">
+            Visite nossa lojinha
+          </p>
+          <a href="https://www.nzinspire-se.com.br/lojapaodeacucar">
+            <img src="https://www.nzinspire-se.com.br/lojapaodeacucar/logo.png" alt="Lojinha" style="max-width: 100px;"/>
+          </a>
+          <p style="color: #8B4513; font-size: 16px;">
+            Av. Bráulio Cavalcante, Pão de Açúcar/AL
+          </p>
+        </div>
+      </div>
+    `,
+    attachments: [{
+      filename: 'logo.png',
+      path: '/path/to/logo.png', // Update with the correct path to your logo
+      cid: 'logo' // Same CID value as in the HTML img src
+    }]
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Email enviado com sucesso');
+  } catch (error) {
+    console.error('Erro ao enviar email:', error);
+  }
+};
+
 const criarDepoimento = async (req: Request, res: Response) => {
   try {
     const { nome, email, telefone, texto } = req.body;
@@ -82,6 +135,9 @@ const criarDepoimento = async (req: Request, res: Response) => {
 
     const depoimentoSalvo = await novoDepoimento.save();
     res.status(201).json(depoimentoSalvo);
+
+    // Send thank you email
+    await sendThankYouEmail(email, nome);
   } catch (error) {
     console.error("Erro ao criar depoimento:", error);
     const errorMessage =

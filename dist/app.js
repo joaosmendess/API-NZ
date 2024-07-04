@@ -14,8 +14,8 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'uploads')));
 const PORT = process.env.PORT || 3001;
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/nz-depoimento?authSource=admin"; // dev pae
-// const MONGODB_URI = process.env.MONGODB_URI || "mongodb://admin:0504@127.0.0.1:27017/nz-depoimento?authSource=admin"; // prod
+// const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/nz-depoimento?authSource=admin"; // dev pae
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://admin:0504@127.0.0.1:27017/nz-depoimento?authSource=admin"; // prod
 // Middleware
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
